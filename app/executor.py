@@ -61,9 +61,8 @@ def execute_script(script):
         except Exception as e:
             return None, "", f"Error running script: {str(e)}"
 
-        # Try to extract the result of main()
+        # Execute the script and capture both stdout and the return value
         try:
-            # Import and call main function with proper stdout handling
             if use_nsjail:
                 result_cmd = [
                     "nsjail",
@@ -80,28 +79,33 @@ def execute_script(script):
 import sys
 import json
 import os
+import io
 sys.path.insert(0, '{tmpdirname}')
 import user_script
 
-# Capture stdout to avoid interference with JSON output
+# Capture stdout to collect print statements
+stdout_capture = io.StringIO()
 old_stdout = sys.stdout
-sys.stdout = open(os.devnull, 'w')
+sys.stdout = stdout_capture
 
 try:
     result = user_script.main()
+    
+    # Get the captured stdout
+    captured_stdout = stdout_capture.getvalue()
     sys.stdout.close()
     sys.stdout = old_stdout
     
-    # Ensure result is JSON serializable
-    if result is not None:
-        json.dumps(result)  # Test if it's JSON serializable
-        print(json.dumps(result))
-    else:
-        print('null')
+    # Return both the result and stdout
+    output = {{
+        "result": result,
+        "stdout": captured_stdout
+    }}
+    print(json.dumps(output))
 except Exception as e:
     sys.stdout.close()
     sys.stdout = old_stdout
-    print(json.dumps(str(e)))
+    print(json.dumps({{"error": str(e)}}))
 """,
                 ]
             else:
@@ -112,28 +116,33 @@ except Exception as e:
 import sys
 import json
 import os
+import io
 sys.path.insert(0, '{tmpdirname}')
 import user_script
 
-# Capture stdout to avoid interference with JSON output
+# Capture stdout to collect print statements
+stdout_capture = io.StringIO()
 old_stdout = sys.stdout
-sys.stdout = open(os.devnull, 'w')
+sys.stdout = stdout_capture
 
 try:
     result = user_script.main()
+    
+    # Get the captured stdout
+    captured_stdout = stdout_capture.getvalue()
     sys.stdout.close()
     sys.stdout = old_stdout
     
-    # Ensure result is JSON serializable
-    if result is not None:
-        json.dumps(result)  # Test if it's JSON serializable
-        print(json.dumps(result))
-    else:
-        print('null')
+    # Return both the result and stdout
+    output = {{
+        "result": result,
+        "stdout": captured_stdout
+    }}
+    print(json.dumps(output))
 except Exception as e:
     sys.stdout.close()
     sys.stdout = old_stdout
-    print(json.dumps(str(e)))
+    print(json.dumps({{"error": str(e)}}))
 """,
                 ]
 
@@ -149,21 +158,21 @@ except Exception as e:
             except subprocess.TimeoutExpired:
                 result_proc.kill()
                 result_proc.communicate()
-                return None, out, "main() function execution timed out (10 seconds)"
+                return None, "", "main() function execution timed out (10 seconds)"
 
             if result_err:
-                return None, out, f"Error executing main(): {result_err}"
+                return None, "", f"Error executing main(): {result_err}"
 
             result_str = result_out.strip()
-            if result_str == "null":
-                result = None
-            else:
-                result = json.loads(result_str)
+            output_data = json.loads(result_str)
+
+            if "error" in output_data:
+                return None, "", output_data["error"]
+
+            return output_data["result"], output_data["stdout"], None
         except Exception as e:
             return (
                 None,
-                out,
+                "",
                 f"Could not run main() or output is not valid JSON: {str(e)}",
             )
-
-        return result, out, None

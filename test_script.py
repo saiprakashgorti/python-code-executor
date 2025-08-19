@@ -47,9 +47,12 @@ import pandas as pd
 import numpy as np
 
 def main():
+    print("Creating DataFrame...")
     data = {'name': ['Alice', 'Bob', 'Charlie'], 'age': [25, 30, 35]}
     df = pd.DataFrame(data)
+    print(f"DataFrame shape: {df.shape}")
     avg_age = np.mean(df['age'])
+    print(f"Average age: {avg_age}")
     return {
         "data": df.to_dict('records'),
         "average_age": float(avg_age),
