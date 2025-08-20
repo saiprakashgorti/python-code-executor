@@ -72,12 +72,92 @@ python-code-executor/
 
 ## Testing
 
+### Automated Testing
 ```bash
 # Test local instance
 python test_script.py
 
 # Test Cloud Run instance
 python test_script.py https://python-code-executor-oz6xf3fctq-uc.a.run.app
+```
+
+### Manual Testing with cURL
+
+#### Basic Hello World
+```bash
+curl -X POST https://python-code-executor-oz6xf3fctq-uc.a.run.app/execute \
+  -H "Content-Type: application/json" \
+  -d '{"script": "print(\"Hello, World!\")"}'
+```
+**Expected Response:**
+```json
+{
+  "result": "Hello, World!",
+  "stdout": "Hello, World!\n"
+}
+```
+
+#### Script with Calculations
+```bash
+curl -X POST https://python-code-executor-oz6xf3fctq-uc.a.run.app/execute \
+  -H "Content-Type: application/json" \
+  -d '{"script": "x = 5\ny = 10\nprint(f\"Sum: {x + y}\")"}'
+```
+**Expected Response:**
+```json
+{
+  "result": "Sum: 15",
+  "stdout": "Sum: 15\n"
+}
+```
+
+#### Using Python Libraries (numpy)
+```bash
+curl -X POST https://python-code-executor-oz6xf3fctq-uc.a.run.app/execute \
+  -H "Content-Type: application/json" \
+  -d '{"script": "import numpy as np\narr = np.array([1, 2, 3, 4, 5])\nprint(f\"Mean: {np.mean(arr)}\")"}'
+```
+**Expected Response:**
+```json
+{
+  "result": "Mean: 3.0",
+  "stdout": "Mean: 3.0\n"
+}
+```
+
+#### Function Definition and Execution
+```bash
+curl -X POST https://python-code-executor-oz6xf3fctq-uc.a.run.app/execute \
+  -H "Content-Type: application/json" \
+  -d '{"script": "def fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)\n\nresult = fibonacci(10)\nprint(f\"Fibonacci(10) = {result}\")"}'
+```
+**Expected Response:**
+```json
+{
+  "result": "Fibonacci(10) = 55",
+  "stdout": "Fibonacci(10) = 55\n"
+}
+```
+
+#### Error Example (Invalid Syntax)
+```bash
+curl -X POST https://python-code-executor-oz6xf3fctq-uc.a.run.app/execute \
+  -H "Content-Type: application/json" \
+  -d '{"script": "print(\"Hello World\""}'
+```
+**Expected Response:**
+```json
+{
+  "error": "SyntaxError: unexpected EOF while parsing"
+}
+```
+
+#### For Local Development
+If running locally, replace the URL with `http://localhost:8080`:
+```bash
+curl -X POST http://localhost:8080/execute \
+  -H "Content-Type: application/json" \
+  -d '{"script": "print(\"Hello from local development!\")"}'
 ```
 
 ## Documentation
