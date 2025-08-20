@@ -10,22 +10,18 @@ from io import StringIO
 
 
 def check_nsjail_available():
-    """Check if nsjail is available on the system"""
     return shutil.which("nsjail") is not None
 
 
 def execute_script(script):
-    # Save to temp file
     with tempfile.TemporaryDirectory() as tmpdirname:
         script_path = os.path.join(tmpdirname, "user_script.py")
         with open(script_path, "w") as f:
             f.write(script)
 
-        # Check if nsjail is available
         use_nsjail = check_nsjail_available()
 
         if use_nsjail:
-            # Use nsjail for secure execution
             nsjail_cmd = [
                 "nsjail",
                 "--quiet",
@@ -39,7 +35,6 @@ def execute_script(script):
                 script_path,
             ]
         else:
-            # Fall back to regular Python execution
             nsjail_cmd = ["python3", script_path]
 
         try:
@@ -50,7 +45,6 @@ def execute_script(script):
                 text=True,
             )
 
-            # Use communicate with timeout
             try:
                 out, err = proc.communicate(timeout=10)
             except subprocess.TimeoutExpired:
@@ -61,7 +55,6 @@ def execute_script(script):
         except Exception as e:
             return None, "", f"Error running script: {str(e)}"
 
-        # Execute the script and capture both stdout and the return value
         try:
             if use_nsjail:
                 result_cmd = [
@@ -83,7 +76,6 @@ import io
 sys.path.insert(0, '{tmpdirname}')
 import user_script
 
-# Capture stdout to collect print statements
 stdout_capture = io.StringIO()
 old_stdout = sys.stdout
 sys.stdout = stdout_capture
@@ -91,12 +83,10 @@ sys.stdout = stdout_capture
 try:
     result = user_script.main()
     
-    # Get the captured stdout
     captured_stdout = stdout_capture.getvalue()
     sys.stdout.close()
     sys.stdout = old_stdout
     
-    # Return both the result and stdout
     output = {{
         "result": result,
         "stdout": captured_stdout
@@ -120,7 +110,6 @@ import io
 sys.path.insert(0, '{tmpdirname}')
 import user_script
 
-# Capture stdout to collect print statements
 stdout_capture = io.StringIO()
 old_stdout = sys.stdout
 sys.stdout = stdout_capture
@@ -128,12 +117,10 @@ sys.stdout = stdout_capture
 try:
     result = user_script.main()
     
-    # Get the captured stdout
     captured_stdout = stdout_capture.getvalue()
     sys.stdout.close()
     sys.stdout = old_stdout
     
-    # Return both the result and stdout
     output = {{
         "result": result,
         "stdout": captured_stdout

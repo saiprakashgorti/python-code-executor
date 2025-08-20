@@ -99,7 +99,6 @@ def test_health_endpoint(base_url):
 
 
 if __name__ == "__main__":
-    # Default to localhost, but allow command line argument for Cloud Run URL
     base_url = "http://localhost:8080"
     if len(sys.argv) > 1:
         base_url = sys.argv[1]
@@ -123,18 +122,18 @@ if __name__ == "__main__":
         try:
             if test():
                 passed += 1
-                print("✅ PASSED")
+                print("PASSED")
             else:
-                print("❌ FAILED")
+                print("FAILED")
         except Exception as e:
-            print(f"❌ ERROR: {e}")
+            print(f"ERROR: {e}")
         print("-" * 30)
 
     print(f"Results: {passed}/{total} tests passed")
     if passed == total:
-        print("🎉 All tests passed!")
+        print("All tests passed!")
     else:
-        print("⚠️  Some tests failed")
+        print("Some tests failed")
 
     print(f"\nUsage:")
     print(f"  python test_script.py                    # Test localhost:8080")

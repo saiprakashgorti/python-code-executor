@@ -4,7 +4,6 @@ from app.validator import validate_script
 from app.executor import execute_script
 import logging
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -17,24 +16,20 @@ class ScriptInput(BaseModel):
 
 @app.route("/health", methods=["GET"])
 def health():
-    """Health check endpoint"""
     return jsonify({"status": "healthy"}), 200
 
 
 @app.route("/execute", methods=["POST"])
 def execute():
     try:
-        # Parse and validate JSON input via Pydantic
         data = request.get_json(force=True)
         user_input = ScriptInput(**data)
 
-        # Validate the script
         err = validate_script(user_input.script)
         if err:
             logger.warning(f"Script validation failed: {err}")
             return jsonify({"error": err}), 400
 
-        # Execute the script
         result, stdout, error = execute_script(user_input.script)
         if error:
             logger.error(f"Script execution failed: {error}")
@@ -52,8 +47,4 @@ def execute():
 
 
 if __name__ == "__main__":
-    # For development
     app.run(host="0.0.0.0", port=8080, debug=False)
-else:
-    # For production with gunicorn
-    pass

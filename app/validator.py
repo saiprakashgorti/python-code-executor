@@ -12,7 +12,6 @@ def validate_script(script):
         if "main" not in func_names:
             return "Script must define a 'main()' function"
 
-        # Check if main function has a return statement
         main_func = None
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef) and node.name == "main":
@@ -24,7 +23,6 @@ def validate_script(script):
             if not has_return:
                 return "main() function must have a return statement"
 
-        # Check for potentially dangerous imports/operations
         dangerous_imports = ["subprocess", "os.system", "eval", "exec", "__import__"]
         script_lower = script.lower()
         for dangerous in dangerous_imports:
